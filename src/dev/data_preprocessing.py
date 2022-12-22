@@ -168,3 +168,55 @@ def handPose_video(wnum, seq):
                         handPose_payload[idx][1] = frame_landmarks_right
 
     return handPose_payload
+
+
+def points_to_displacement(face_points, face_count, hand_points,
+                           hand_count):  # face_count: 얼굴 특징점 갯수, hand_count: 한 손 특징점 갯수
+    displacement_payload = []
+
+    # face mash
+
+    nz = False
+    for idx, frame in enumerate(face_points):
+        #        print(f"얼굴 {idx}프레임: {frame}")
+        if type(frame) == int:
+            print("인식 안됨")
+            displacement_payload.append({"face": [[0, 0, 0] for _ in range(face_count)]})
+        elif not nz:
+            #            print("처음 인식됨")
+            nz = True
+            displacement_payload.append({"face": [[0, 0, 0] for _ in range(face_count)]})
+        else:
+            displacements = []
+            for i in range(face_count):
+                # print(f"{frame[i][0]}-{points[idx][i][0]}")
+                displacements.append([[frame[i][0] - face_points[idx - 1][i][0],
+                                       frame[i][1] - face_points[idx - 1][i][1],
+                                       frame[i][2] - face_points[idx - 1][i][2]]])
+            # print(displacements)
+            displacement_payload.append({"face": displacements})
+
+    # hand pose estimation
+    lr = ["left", "right"]
+    nz = [False, False]
+    for idx, frame in enumerate(hand_points):
+        hand_displacements = {}
+        for i, hand in enumerate(frame):
+            if type(hand) == int:
+                # print(f"{idx}: {lr[i]} 인식 안됨")
+                hand_displacements[lr[i]] = [[0, 0, 0] for _ in range(hand_count)]
+            elif not nz[i]:
+                # print(f"{idx}: {lr[i]} 처음 인식됨")
+                hand_displacements[lr[i]] = [[0, 0, 0] for _ in range(hand_count)]
+                nz[i] = True
+            else:
+                hand_displacements[lr[i]] = []
+                for j, point in enumerate(hand):
+                    hand_displacements[lr[i]].append([point[0] - hand_points[idx - 1][i][j][0],
+                                                      point[1] - hand_points[idx - 1][i][j][1],
+                                                      point[2] - hand_points[idx - 1][i][j][2]])
+                # print(hand_displacements)
+        displacement_payload[idx]["hands"] = hand_displacements
+        # print(f"{idx}: {displacement_payload[idx]['hands']}")
+
+    return displacement_payload
