@@ -170,8 +170,8 @@ def handPose_video(wnum, seq):
     return handPose_payload
 
 
-def points_to_displacement(face_points, face_count, hand_points,
-                           hand_count):  # face_count: 얼굴 특징점 갯수, hand_count: 한 손 특징점 갯수
+# face_count: 얼굴 특징점 갯수, hand_count: 한 손 특징점 갯수
+def points_to_displacement(face_points, face_count, hand_points, hand_count):
     displacement_payload = []
 
     # face mash
