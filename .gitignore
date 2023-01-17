@@ -1,7 +1,0 @@
-*.iml
-*.xml
-.idea/**
-dataset/**
-*.p
-*.bin
-*.bin.gz
